@@ -5,3 +5,4 @@ langchain-huggingface
 huggingface_hub
 python-dotenv
 streamlit
+duckduckgo-search
