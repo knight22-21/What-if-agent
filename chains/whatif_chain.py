@@ -2,26 +2,27 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.prompts import PromptTemplate
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+def get_agent_executor(hf_api_key: str):
+    # Define tool
+    search_tool = DuckDuckGoSearchRun()
 
-search_tool = DuckDuckGoSearchRun()
+    # Define LLM endpoint
+    llm_endpoint = HuggingFaceEndpoint(
+        repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
+        task="text-generation",
+        huggingfacehub_api_token=hf_api_key,
+        temperature=0.5,
+        max_new_tokens=512,
+    )
 
-llm_endpoint = HuggingFaceEndpoint(
-    repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
-    task="text-generation",
-    temperature=0.5,
-    max_new_tokens=512,
-)
+    # Wrap with Chat interface
+    llm = ChatHuggingFace(llm=llm_endpoint)
 
-llm = ChatHuggingFace(llm=llm_endpoint)
-
-# ✅ Updated PromptTemplate with required input variables
-what_if_template = PromptTemplate(
-    input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
-    template="""You are a highly creative and logical assistant who answers hypothetical 'What if' questions.
+    # ReAct Prompt Template
+    what_if_prompt = PromptTemplate(
+        input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
+        template="""You are a highly creative and logical assistant who answers hypothetical 'What if' questions.
 Your task is to explore the scenario in a thoughtful, step-by-step, and imaginative way.
 
 Available Tools:
@@ -46,22 +47,18 @@ Final Answer: <your detailed 'what if' scenario>
 What if: {input}
 {agent_scratchpad}
 """
-)
+    )
 
-agent = create_react_agent(
-    llm=llm,
-    tools=[search_tool],
-    prompt=what_if_template
-)
+    # Create ReAct agent
+    agent = create_react_agent(
+        llm=llm,
+        tools=[search_tool],
+        prompt=what_if_prompt
+    )
 
-agent_executor = AgentExecutor(
-    agent=agent,
-    tools=[search_tool],
-    verbose=True,
-    handle_parsing_errors=True
-)
-
-response = agent_executor.invoke({"input": "What if humans never discovered fire?"})
-
-print("\n--- What If Response ---\n")
-print(response["output"])
+    return AgentExecutor(
+        agent=agent,
+        tools=[search_tool],
+        verbose=True,
+        handle_parsing_errors=True
+    )
