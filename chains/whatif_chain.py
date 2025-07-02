@@ -51,7 +51,7 @@ What if: {input}
 """
 )
 
-    # Create ReAct agent
+    # ReAct agent
     agent = create_react_agent(
         llm=llm,
         tools=[search_tool],
