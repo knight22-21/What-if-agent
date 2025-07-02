@@ -4,7 +4,7 @@ from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.prompts import PromptTemplate
 
 def get_agent_executor(hf_api_key: str):
-    # Define tool
+    # Define tool 
     search_tool = DuckDuckGoSearchRun()
 
     # Define LLM endpoint
