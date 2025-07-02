@@ -21,33 +21,35 @@ def get_agent_executor(hf_api_key: str):
 
     # ReAct Prompt Template
     what_if_prompt = PromptTemplate(
-        input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
-        template="""You are a highly creative and logical assistant who answers hypothetical 'What if' questions.
-Your task is to explore the scenario in a thoughtful, step-by-step, and imaginative way.
+    input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
+    template="""You are a highly intelligent and creative assistant that answers hypothetical 'What if' questions
+by reasoning carefully and using available tools when needed.
 
-Available Tools:
+You have access to the following tools:
 {tools}
 
 Tool Names:
 {tool_names}
 
 Instructions:
-- If necessary, use tools to find facts.
-- Think step-by-step.
-- Be imaginative, but grounded in reasoning.
+- Always ask yourself: "Do I need external information to answer this?"
+- If the scenario involves events, timelines, space, war, science, or history — USE A TOOL FIRST.
+- Only proceed without a tool if you're 100% confident in your internal knowledge.
 
 Format:
 Thought: Do I need to use a tool?
 Action: <tool name>
 Action Input: <your query>
 
-Thought: Proceeding with analysis...
-Final Answer: <your detailed 'what if' scenario>
+Observation: <result of tool>
+
+Thought: Proceeding with reasoning...
+Final Answer: <your detailed 'what if' timeline, structured in events>
 
 What if: {input}
 {agent_scratchpad}
 """
-    )
+)
 
     # Create ReAct agent
     agent = create_react_agent(
